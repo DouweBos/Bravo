@@ -88,10 +88,14 @@ echo "* Create distribution directories..."
 mkdir -p "$maestro_tmp_folder"
 
 
+# Bravo fork: artifacts are served through the houwert.dev reverse proxy
+# (functions/bravo/get/* on Cloudflare Pages), which streams them from the
+# private DouweBos/Bravo GitHub Releases. The path shape mirrors GitHub's own
+# release URLs so only the host differs from upstream Maestro.
 if [ -z "$MAESTRO_VERSION" ]; then
-    download_url="https://github.com/mobile-dev-inc/maestro/releases/latest/download/maestro.zip"
+    download_url="https://houwert.dev/bravo/get/releases/latest/download/maestro.zip"
 else
-    download_url="https://github.com/mobile-dev-inc/maestro/releases/download/cli-$MAESTRO_VERSION/maestro.zip"
+    download_url="https://houwert.dev/bravo/get/releases/download/cli-$MAESTRO_VERSION/maestro.zip"
 fi
 
 maestro_zip_file="${maestro_tmp_folder}/maestro.zip"

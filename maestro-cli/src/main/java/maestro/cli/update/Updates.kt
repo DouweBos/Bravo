@@ -56,7 +56,7 @@ object Updates {
             return null
         }
 
-        val latestCliVersion = ApiClient(EnvUtils.BASE_API_URL).getLatestCliVersion()
+        val latestCliVersion = ApiClient(EnvUtils.BRAVO_UPDATE_BASE_URL).getLatestCliVersion()
 
         return if (latestCliVersion > CLI_VERSION) {
             latestCliVersion

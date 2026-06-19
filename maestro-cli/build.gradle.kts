@@ -422,8 +422,9 @@ jreleaser {
 
             release {
                 github {
-                    repoOwner.set("mobile-dev-inc")
-                    name.set("maestro")
+                    // Bravo fork: releases land on DouweBos/Bravo, not upstream mobile-dev-inc/maestro.
+                    repoOwner.set("DouweBos")
+                    name.set("Bravo")
                     tagName.set("cli-$FULL_CLI_VERSION")
                     releaseName.set("CLI $FULL_CLI_VERSION")
                     overwrite.set(true)
@@ -438,7 +439,7 @@ jreleaser {
                         content.set("""
                             [See changelog in the CHANGELOG.md file][link]
 
-                            [link]: https://github.com/mobile-dev-inc/maestro/blob/main/CHANGELOG.md#{{changelogVersionHeader}}
+                            [link]: https://github.com/DouweBos/Bravo/blob/main/CHANGELOG.md#{{changelogVersionHeader}}
                         """.trimIndent()
                         )
                     }
@@ -449,7 +450,9 @@ jreleaser {
 
     packagers {
         brew {
-            setActive("RELEASE")
+            // Bravo fork has no Homebrew tap yet — disable brew publishing so
+            // jreleaserFullRelease doesn't fail trying to push a formula.
+            setActive("NEVER")
             extraProperties.put("skipJava", "true")
             formulaName.set("Maestro")
 

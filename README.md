@@ -98,11 +98,15 @@ java -version
 
 Installing the CLI:
 
-Run the following command to install Maestro on macOS, Linux or Windows (WSL):
+Run the following command to install **Bravo** on macOS, Linux or Windows (WSL):
 
 ```
-curl -fsSL "https://get.maestro.mobile.dev" | bash
+curl -fsSL "https://houwert.dev/bravo/get" | bash
 ```
+
+This installs the Bravo CLI (a drop-in `maestro` command) from Houwert's distribution — see [Fork commit registry](#fork-commit-registry) for how it's served. To install a specific version, set `MAESTRO_VERSION` (e.g. `MAESTRO_VERSION=2.6.1`) before running.
+
+> Upstream Maestro installs via `curl -fsSL "https://get.maestro.mobile.dev" | bash` — use the Bravo URL above instead to get Houwert's multi-platform build.
 
 The links below will guide you through the next steps.
 

@@ -18,8 +18,10 @@ object ChangeLogUtils {
         ?.filter { it.isNotEmpty() && it.startsWith("- ") }
 
     fun fetchContent(): String? {
+        // Bravo fork: served through the houwert.dev proxy because DouweBos/Bravo is
+        // private (raw.githubusercontent would 401 without auth).
         val request = Request.Builder()
-            .url("https://raw.githubusercontent.com/mobile-dev-inc/maestro/main/CHANGELOG.md")
+            .url("${EnvUtils.BRAVO_UPDATE_BASE_URL}/CHANGELOG.md")
             .build()
         return HttpClient.build("ChangeLogUtils").newCall(request).execute().body?.string()
     }
