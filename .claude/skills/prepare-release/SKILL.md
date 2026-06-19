@@ -6,17 +6,45 @@ version: 1.0.0
 
 # Prepare Release Skill
 
-Automates the three-file release-prep workflow: CHANGELOG.md entry, and version bumps in both gradle.properties files.
+Automates the release-prep workflow: a CHANGELOG.md entry plus version bumps.
+
+## Versioning scheme
+
+Bravo versions are **`major.minor.patch.build`**:
+
+- **`major.minor.patch`** tracks upstream Maestro — `CLI_VERSION` in
+  `maestro-cli/gradle.properties` and `VERSION_NAME` in `gradle.properties`. These
+  are overwritten by upstream on rebase; we follow them.
+- **`build`** is the fork-owned segment — `BRAVO_BUILD`. It is **auto-incremented at
+  release time** by the `publish-cli` workflow (it finds the highest existing
+  `cli-<CLI_VERSION>.<N>` release and uses `N+1`, or `0` for a new Maestro version),
+  so fork-only fixes ship without drifting from Maestro's version. You do **not**
+  hand-edit it; the value in `maestro-cli/gradle.properties` is only a local-build
+  fallback.
+
+The composed `major.minor.patch.build` is assembled in `maestro-cli/build.gradle.kts`
+(`FULL_CLI_VERSION`) and used for `version.properties`, the JReleaser tag
+(`cli-X.Y.Z.B`), and the release name. The CHANGELOG and its consistency test stay
+keyed on the 3-part `CLI_VERSION` (the build segment is fork metadata, not a
+Maestro changelog version).
 
 ## Steps
 
-### 1. Determine the version number
+### 1. Determine the release type and version
 
-Check if the user has provided a version number in their message. If not, use `AskUserQuestion` to ask:
+Decide which kind of release this is:
 
-> "What version number should this release be? (e.g. 2.5.1)"
+- **Fork-only release** — a fix to Bravo's own additions on the *same* Maestro base.
+  Nothing to bump: leave `CLI_VERSION`/`VERSION_NAME` as-is. `publish-cli` will pick
+  the next `BRAVO_BUILD` automatically when you dispatch it. This skill's only job
+  here is an optional CHANGELOG bullet (step 3); steps 4 is a no-op.
+- **Upstream-tracking release** — `major.minor.patch` is moving (typically right
+  after an upstream rebase). Set `CLI_VERSION`/`VERSION_NAME` to the new Maestro
+  version (step 4); `BRAVO_BUILD` resets to `0` on its own, since there are no
+  `cli-<new version>.<N>` releases yet.
 
-Use the version exactly as provided (no `v` prefix).
+If the user hasn't said which, use `AskUserQuestion` to confirm the type and the
+target `major.minor.patch` (no `v` prefix).
 
 ### 2. Find commits since the last tag
 
@@ -34,12 +62,19 @@ git log <tag>..HEAD --oneline
 
 ### 3. Update CHANGELOG.md
 
-File: `CHANGELOG.md`
+File: `CHANGELOG.md`. CHANGELOG headers are the **3-part** `major.minor.patch`.
 
-Insert a new version section **between** the `## Unreleased` line and the first existing version header. Format:
+- **Upstream-tracking release**: insert a new section **between** the `## Unreleased`
+  line and the first existing version header, headed by the new `major.minor.patch`.
+- **Fork-only release** (`BRAVO_BUILD` bump, same `major.minor.patch`): the section
+  for the current `major.minor.patch` already exists — append the fork fix as a new
+  bullet there rather than adding a new header. (The consistency test only requires a
+  non-empty entry for `CLI_VERSION`.)
+
+Section format:
 
 ```markdown
-## <version>
+## <major.minor.patch>
 
 - <entry 1>
 - <entry 2>
@@ -53,18 +88,21 @@ Insert a new version section **between** the `## Unreleased` line and the first 
 - Rewrite for clarity and consistency with the existing CHANGELOG tone (sentence case, imperative or noun phrases).
 - Do **not** add a "Thanks to" contributors line — that is added manually.
 
-### 4. Update version numbers in both gradle.properties files
+### 4. Update version numbers (upstream-tracking release only)
 
-Update these two files so all three files carry the same version:
+For a **fork-only release**, skip this step — leave the version files untouched.
 
-**`gradle.properties`** — change the `VERSION_NAME` line:
+For an **upstream-tracking release**, set the new 3-part Maestro version in both
+files. Leave `BRAVO_BUILD` alone (it is auto-incremented at release time):
+
+**`gradle.properties`** — `VERSION_NAME` (3-part Maestro version):
 ```
-VERSION_NAME=<new version>
+VERSION_NAME=<major.minor.patch>
 ```
 
-**`maestro-cli/gradle.properties`** — change the `CLI_VERSION` line:
+**`maestro-cli/gradle.properties`** — `CLI_VERSION` (3-part):
 ```
-CLI_VERSION=<new version>
+CLI_VERSION=<major.minor.patch>
 ```
 
 ### 5. Run ChangeLogUtilsTest
@@ -73,6 +111,6 @@ CLI_VERSION=<new version>
 ./gradlew :maestro-cli:test --tests "maestro.cli.util.ChangeLogUtilsTest"
 ```
 
-The key test (`test format last version`) reads `CLI_VERSION` from `maestro-cli/gradle.properties` and asserts that the CHANGELOG contains a non-empty entry for that version. All three files must be consistent for the test to pass.
+The key test (`test format last version`) reads the generated version, takes its 3-part base (`major.minor.patch`), and asserts the CHANGELOG contains a non-empty entry for it. So the CHANGELOG must have a populated section for the current `CLI_VERSION` — the `BRAVO_BUILD` segment is ignored by this check.
 
 Report the test result. If it fails, diagnose and fix before finishing.

@@ -56,7 +56,7 @@ object Updates {
             return null
         }
 
-        val latestCliVersion = ApiClient(EnvUtils.BASE_API_URL).getLatestCliVersion()
+        val latestCliVersion = ApiClient(EnvUtils.BRAVO_UPDATE_BASE_URL).getLatestCliVersion()
 
         return if (latestCliVersion > CLI_VERSION) {
             latestCliVersion
@@ -69,7 +69,9 @@ object Updates {
         if (CLI_VERSION == null) {
             return null
         }
-        val version = fetchUpdates()?.toString() ?: return null
+        // CHANGELOG sections are keyed on Maestro's major.minor.patch, so match on
+        // the base version rather than the full major.minor.patch.build.
+        val version = fetchUpdates()?.baseVersion ?: return null
         val content = ChangeLogUtils.fetchContent()
         return ChangeLogUtils.formatBody(content, version)
     }

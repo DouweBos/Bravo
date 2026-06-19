@@ -1,0 +1,31 @@
+{
+  "setup": {
+    "copy": [{ "path": ".claude", "exclude": ["projects/**/worktrees/**"] }]
+  },
+  "run": [
+    {
+      "title": "Install locally",
+      "command": "./installLocally.sh",
+      "restartOnRerun": true
+    },
+    {
+      "title": "Build CLI",
+      "command": "./gradlew :maestro-cli:installDist",
+      "restartOnRerun": true
+    },
+    {
+      "title": "Unit tests",
+      "command": "./gradlew test",
+      "restartOnRerun": true
+    }
+  ],
+  "platforms": ["ios", "android", "tvos", "web"],
+  "protected_branches": ["main"],
+  "default_base_branch": "main",
+  "related_projects": [
+    {
+      "path": "../Argus",
+      "description": "Agentic IDE that drives Bravo/Maestro via the conductor CLI for runtime device testing"
+    }
+  ]
+}

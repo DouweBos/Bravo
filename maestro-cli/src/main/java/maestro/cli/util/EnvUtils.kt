@@ -16,6 +16,11 @@ import java.util.concurrent.TimeoutException
 object EnvUtils {
     private const val PROD_API_URL = "https://api.copilot.mobile.dev"
 
+    // Bravo fork: the CLI update check resolves the latest version from our own
+    // distribution endpoint (houwert.dev reverse proxy -> DouweBos/Bravo releases),
+    // not upstream Maestro's API. Overridable via BRAVO_UPDATE_URL for local testing.
+    private const val PROD_BRAVO_UPDATE_URL = "https://houwert.dev/bravo/get"
+
     val OS_NAME: String = System.getProperty("os.name")
     val OS_ARCH: String = System.getProperty("os.arch")
     val OS_VERSION: String = System.getProperty("os.version")
@@ -32,6 +37,11 @@ object EnvUtils {
 
     val BASE_API_URL: String
         get() = System.getenv("MAESTRO_API_URL") ?: PROD_API_URL
+
+    // Base URL for the Bravo CLI update check. The endpoint `$BRAVO_UPDATE_BASE_URL/v2/maestro/version`
+    // returns the latest published version as {major, minor, patch}.
+    val BRAVO_UPDATE_BASE_URL: String
+        get() = System.getenv("BRAVO_UPDATE_URL") ?: PROD_BRAVO_UPDATE_URL
 
     fun xdgStateHome(): Path {
         if (System.getenv("XDG_STATE_HOME") != null) {
