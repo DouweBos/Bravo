@@ -69,7 +69,9 @@ object Updates {
         if (CLI_VERSION == null) {
             return null
         }
-        val version = fetchUpdates()?.toString() ?: return null
+        // CHANGELOG sections are keyed on Maestro's major.minor.patch, so match on
+        // the base version rather than the full major.minor.patch.build.
+        val version = fetchUpdates()?.baseVersion ?: return null
         val content = ChangeLogUtils.fetchContent()
         return ChangeLogUtils.formatBody(content, version)
     }

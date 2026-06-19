@@ -33,9 +33,9 @@ fun main() {
     val changelogFile = File(System.getProperty("user.dir"), "CHANGELOG.md")
     val content = changelogFile.readText()
     val unreleased = ChangeLogUtils.formatBody(content, "Unreleased")
-    val current = ChangeLogUtils.formatBody(content, CLI_VERSION.toString())
+    val current = ChangeLogUtils.formatBody(content, CLI_VERSION?.baseVersion.orEmpty())
     val changelog = unreleased ?: current
-    println("## ${unreleased?.let { "Unreleased" } ?: CLI_VERSION.toString()}")
+    println("## ${unreleased?.let { "Unreleased" } ?: CLI_VERSION?.baseVersion}")
     println("-".repeat(100))
     println(ChangeLogUtils.print(changelog))
     println("-".repeat(100))
